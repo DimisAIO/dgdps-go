@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DindeGDPS Go</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #222;
+      overflow: hidden;
+    }
+
+    #dropzone {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 2px dashed #ccc;
+      text-align: center;
+      padding-top: 0px;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      color: #999;
+      background-color: #333;
+      transition: border-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #dropzone.dragover {
+      border-color: #aaa;
+    }
+
+    #downloadBtn {
+      display: none;
+      margin-top: 20px;
+      color: #fff;
+      text-decoration: none;
+      background-color: #4CAF50;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    #downloadBtn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div id="dropzone">
+    Drag and drop GeometryDash.exe<br> (no gdps)
+  </div>
+
+  <a id="downloadBtn" href="#" download="DindeGDPS.exe"><i class="fas fa-download"></i> Download DindeGDPS</a>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+  <script>
+    function handleDrop(e) {
+      e.preventDefault();
+      var file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/x-msdownload') {
+        uploadFile(file);
+      }
+    }
+  
+    function uploadFile(file) {
+      var formData = new FormData();
+      formData.append('file', file);
+  
+      var dropzone = document.getElementById('dropzone');
+      dropzone.classList.remove('dragover');
+  
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.blob();
+          } else {
+            throw new Error('Error uploading file');
+          }
+        })
+        .then(blob => {
+          var downloadURL = URL.createObjectURL(blob);
+  
+          // Automatic download
+          var a = document.createElement('a');
+          a.href = downloadURL;
+          a.download = 'DindeGDPS.exe';
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+  
+          // Manual download option
+          var downloadBtn = document.getElementById('downloadBtn');
+          downloadBtn.href = downloadURL;
+          downloadBtn.style.display = 'block';
+  
+          // Remove dropzone
+          dropzone.parentNode.removeChild(dropzone);
+        })
+        .catch(error => {
+          console.error(error);
+          // Show error message or handle the error accordingly
+        });
+    }
+  
+    function handleDragOver(e) {
+      e.preventDefault();
+      var dropzone = document.getElementById('dropzone');
+      dropzone.classList.add('dragover');
+    }
+  
+    function handleDragLeave(e) {
+      e.preventDefault();
+      var dropzone = document.getElementById('dropzone');
+      dropzone.classList.remove('dragover');
+    }
+  
+    var dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('drop', handleDrop, false);
+    dropzone.addEventListener('dragover', handleDragOver, false);
+    dropzone.addEventListener('dragleave', handleDragLeave, false);
+    dropzone.addEventListener('click', function () {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.exe';
+      input.addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (file && file.type === 'application/x-msdownload') {
+          uploadFile(file);
+        }
+      });
+      input.click();
+    });
+  </script>
+  
+</body>
+</html>
