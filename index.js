@@ -40,6 +40,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.send(modifiedFile);
 });
 
-app.listen(8100, () => {
-  console.log(`Server is running on port lol`);
+app.listen(2000, () => {
+  console.log(`Server is running on port 2000`);
 });
